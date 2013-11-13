@@ -1,0 +1,13 @@
+
+#container {
+    border:2px solid;
+    border-radius:15px;
+    float: left;
+}
+#leftDiv {
+     float: left;
+}
+#rightDiv {
+    padding-right: 20px;
+    float: right;
+}
