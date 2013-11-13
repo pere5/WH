@@ -30,7 +30,18 @@ $(document).ready(function () {
         fill: 'yellow',
         stroke: 'black',
         strokeWidth: 4,
-        offset: [0, 0]
+        offset: [0, 0],
+        draggable: true,
+        dragBoundFunc: function (pos) {
+            this.setRotation(Math.atan2(
+                stage.getPointerPosition().y - this.getY(),
+                stage.getPointerPosition().x - this.getX()
+            ));
+            return {
+                x: this.getX(),
+                y: this.getY()
+            }
+        }
     });
     yellowRect.on('click', function() {
         var circle = stage.find('#yellowRectCircle')[0];
@@ -45,29 +56,16 @@ $(document).ready(function () {
                 radius: 10,
                 fill: 'transparent',
                 stroke: 'darkGray',
-                strokeWidth: 2
-            });
-            circle.on('click', function() {
-
+                strokeWidth: 2,
+                draggable: true
             });
             layer.add(circle);
             layer.draw();
         }
     });
+
     layer.add(yellowRect);
     layer.draw();
-
-    window.addEventListener('keydown', function(e) {
-        if (e.keyCode == 37) //Left Arrow Key
-            yellowRect.setRotation(yellowRect.getRotation() - Math.PI/72);
-        if (e.keyCode == 38) //Up Arrow Key
-            yellowRect.setRotation(yellowRect.getRotation() - Math.PI/72);
-        if (e.keyCode == 39) //Right Arrow Key
-            yellowRect.setRotation(yellowRect.getRotation() + Math.PI/72);
-        if (e.keyCode == 40) //Top Arrow Key
-            yellowRect.setRotation(yellowRect.getRotation() + Math.PI/72);
-        layer.draw();
-    });
     //rotateRect(layer, yellowRect);
 });
 
