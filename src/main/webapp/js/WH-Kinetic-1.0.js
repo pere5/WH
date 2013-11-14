@@ -17,66 +17,123 @@ $(document).ready(function () {
     });
     var layer = new Kinetic.Layer();
     createBackLayer(stage, layer);
-    createFrontLayer(stage, layer);
+    createGameLayer(stage, layer);
     drawGrid(layer);
+    function createYellowRectGroup() {
+        var yellowRectGroup = new Kinetic.Group({
+            id: 'yellowRectGroup',
+            x: 250,
+            y: 200,
+            offset: [0, 0],
+            draggable: false,
+            rotateLeftHand: true,
+            dragBoundFunc: function (pos) {
+                if (this.getAttr('rotateLeftHand')) {
+                    this.setRotation(Math.atan2(
+                        stage.getPointerPosition().y - this.getY(),
+                        stage.getPointerPosition().x - this.getX()
+                    ));
+                } else {
+                    this.setRotation(Math.atan2(
+                        this.getY() - stage.getPointerPosition().y,
+                        this.getX() - stage.getPointerPosition().x
+                    ));
+                }
+                return {
+                    x: this.getX(),
+                    y: this.getY()
+                }
+            }
+        });
+        return yellowRectGroup;
+    }
+    var yellowRectGroup = createYellowRectGroup();
+    var yellowRect = createYellowRect(stage, layer, yellowRectGroup);
+    yellowRectGroup.add(yellowRect);
+    layer.add(yellowRectGroup);
+    layer.draw();
+});
 
+function createYellowRect(stage, layer, yellowRectGroup) {
     var yellowRect = new Kinetic.Rect({
         id: 'yellowRect',
-        selected: false,
-        x: 250,
-        y: 200,
+        x: 0,
+        y: 0,
         width: 100,
         height: 50,
         fill: 'yellow',
         stroke: 'black',
-        strokeWidth: 4,
-        offset: [0, 0],
-        draggable: true,
-        dragBoundFunc: function (pos) {
-            this.setRotation(Math.atan2(
-                stage.getPointerPosition().y - this.getY(),
-                stage.getPointerPosition().x - this.getX()
-            ));
-            return {
-                x: this.getX(),
-                y: this.getY()
-            }
-        }
+        strokeWidth: 4
     });
-    yellowRect.on('click', function() {
-        var circle = stage.find('#yellowRectCircle')[0];
-        if (this.getAttr('selected') === false && typeof circle === 'undefined') {
-            this.setAttr('stroke', true)
-            this.setAttr('stroke', '66CC66');
-            this.setAttr('strokeWidth', 2);
-            var circle = new Kinetic.Circle({
-                id: 'yellowRectCircle',
+    yellowRect.on('click', function () {
+        var circle = stage.find('.yellowRectCircle')[0];
+        if (typeof circle === 'undefined') {
+            this.setStroke(true)
+            this.setStroke('66CC66');
+            this.setStrokeWidth(2);
+            var circleLeft = new Kinetic.Circle({
+                name: 'yellowRectCircle',
                 x: this.getX(),
                 y: this.getY(),
                 radius: 10,
                 fill: 'transparent',
                 stroke: 'darkGray',
-                strokeWidth: 2,
-                draggable: true
+                strokeWidth: 2
             });
-            layer.add(circle);
+            var circleLeft = circleOnClick(layer, yellowRectGroup, true);
+            yellowRectGroup.add(circleLeft);
+            var circleRight = circleOnClick(layer, yellowRectGroup, false);
+            yellowRectGroup.add(circleRight);
             layer.draw();
         }
     });
+    return yellowRect;
+}
 
-    layer.add(yellowRect);
-    layer.draw();
-    //rotateRect(layer, yellowRect);
-});
+function circleOnClick(layer, yellowRectGroup, leftCircle) {
+    var yellowRect_l = yellowRectGroup.find('#yellowRect')[0];
+    var groupX = leftCircle ? yellowRectGroup.getX() + yellowRect_l.getWidth() : yellowRectGroup.getX();
+    var offsetX = leftCircle ? 0 : yellowRect_l.getWidth();
+    var offsetXReverse = leftCircle ? yellowRect_l.getWidth() : 0;
+    var circle = new Kinetic.Circle({
+        name: 'yellowRectCircle',
+        x: offsetX,
+        y: yellowRect_l.getY(),
+        radius: 10,
+        fill: 'transparent',
+        stroke: 'darkGray',
+        strokeWidth: 2
+    });
+    circle.on('click', function () {
+        if (isCirclesTransparent(yellowRectGroup)) {
+            this.setFill('darkGray');
+            yellowRectGroup.setX(groupX);
+            yellowRectGroup.setOffset([offsetXReverse, 0]);
+            yellowRectGroup.setDraggable(true);
+            yellowRectGroup.setAttr('rotateLeftHand', !leftCircle);
+        } else {
+            setCirclesTransparent(yellowRectGroup);
+            yellowRectGroup.setDraggable(false);
+        }
+        layer.draw();
+    });
+    return circle;
+}
 
-function rotateRect(layer, yellowRect) {
-// one revolution per 4 seconds
-    var angularSpeed = Math.PI / 2;
-    var anim = new Kinetic.Animation(function (frame) {
-        var angleDiff = frame.timeDiff * angularSpeed / 1000;
-        yellowRect.rotate(angleDiff);
-    }, layer);
-    anim.start();
+function isCirclesTransparent(yellowRectGroup) {
+    var circles = yellowRectGroup.find('.yellowRectCircle');
+    for (var i = 0; i < circles.length; i++) {
+        if (circles[i].getFill() !== 'transparent') {
+            return false;
+        }
+    }
+    return true;
+}
+
+function setCirclesTransparent(yellowRectGroup) {
+    $(yellowRectGroup.find('.yellowRectCircle')).each(function( index ) {
+        this.setFill('transparent');
+    });
 }
 
 function drawGrid(layer) {
@@ -117,19 +174,22 @@ function createBackLayer(stage, layer) {
     // There's probably a better way to do this, but I don't know it.
     stage.on('click', function (evt) {
         if (evt.targetNode.attrs.name == 'backLayer') {
-            var yellowRect = stage.find('#yellowRect')[0];
-            yellowRect.setAttr('stroke', 'black');
-            yellowRect.setAttr('strokeWidth', 4);
-            var circle = stage.find('#yellowRectCircle')[0];
-            if (typeof circle !== 'undefined') {
-                circle.destroy();
-            }
+            var yellowRectGroup = stage.find('#yellowRectGroup')[0];
+            var yellowRect = yellowRectGroup.find('#yellowRect')[0];
+            yellowRectGroup.setDraggable(false);
+            yellowRect.setStroke('black');
+            yellowRect.setStrokeWidth(4);
+            $(stage.find('.yellowRectCircle')).each(function( index ) {
+                if (typeof this !== 'undefined') {
+                    this.destroy();
+                }
+            });
             layer.draw();
         }
     });
     stage.add(backLayer);
 }
 
-function createFrontLayer(stage, layer) {
+function createGameLayer(stage, layer) {
     stage.add(layer);
 }
