@@ -91,19 +91,19 @@ function createYellowRect(stage, layer, yellowRectGroup) {
 }
 
 function circleOnClick(layer, yellowRectGroup, leftCircle) {
-    var yellowRect_l = yellowRectGroup.find('#yellowRect')[0];
-    var groupX = leftCircle ? yellowRectGroup.getX() + yellowRect_l.getWidth() : yellowRectGroup.getX();
-    var offsetX = leftCircle ? 0 : yellowRect_l.getWidth();
-    var offsetXReverse = leftCircle ? yellowRect_l.getWidth() : 0;
+    var yellowRect = yellowRectGroup.find('#yellowRect')[0];
+    var offsetX = leftCircle ? 0 : yellowRect.getWidth();
     var circle = new Kinetic.Circle({
         name: 'yellowRectCircle',
         x: offsetX,
-        y: yellowRect_l.getY(),
+        y: yellowRect.getY(),
         radius: 10,
         fill: 'transparent',
         stroke: 'darkGray',
         strokeWidth: 2
     });
+    var groupX = leftCircle ? yellowRectGroup.getX() + yellowRect.getWidth() : yellowRectGroup.getX();
+    var offsetXReverse = leftCircle ? yellowRect.getWidth() : 0;
     circle.on('click', function () {
         if (isCirclesTransparent(yellowRectGroup)) {
             this.setFill('darkGray');
