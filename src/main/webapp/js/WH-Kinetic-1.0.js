@@ -19,40 +19,41 @@ $(document).ready(function () {
     createBackLayer(stage, layer);
     createGameLayer(stage, layer);
     drawGrid(layer);
-    function createYellowRectGroup() {
-        var yellowRectGroup = new Kinetic.Group({
-            id: 'yellowRectGroup',
-            x: 250,
-            y: 200,
-            offset: [0, 0],
-            draggable: false,
-            rotateLeftHand: true,
-            dragBoundFunc: function (pos) {
-                if (this.getAttr('rotateLeftHand')) {
-                    this.setRotation(Math.atan2(
-                        stage.getPointerPosition().y - this.getY(),
-                        stage.getPointerPosition().x - this.getX()
-                    ));
-                } else {
-                    this.setRotation(Math.atan2(
-                        this.getY() - stage.getPointerPosition().y,
-                        this.getX() - stage.getPointerPosition().x
-                    ));
-                }
-                return {
-                    x: this.getX(),
-                    y: this.getY()
-                }
-            }
-        });
-        return yellowRectGroup;
-    }
-    var yellowRectGroup = createYellowRectGroup();
+    var yellowRectGroup = createYellowRectGroup(stage);
     var yellowRect = createYellowRect(stage, layer, yellowRectGroup);
     yellowRectGroup.add(yellowRect);
     layer.add(yellowRectGroup);
     layer.draw();
 });
+
+function createYellowRectGroup(stage) {
+    var yellowRectGroup = new Kinetic.Group({
+        id: 'yellowRectGroup',
+        x: 250,
+        y: 200,
+        offset: [0, 0],
+        draggable: false,
+        rotateLeftHand: true,
+        dragBoundFunc: function (pos) {
+            if (this.getAttr('rotateLeftHand')) {
+                this.setRotation(Math.atan2(
+                    stage.getPointerPosition().y - this.getY(),
+                    stage.getPointerPosition().x - this.getX()
+                ));
+            } else {
+                this.setRotation(Math.atan2(
+                    this.getY() - stage.getPointerPosition().y,
+                    this.getX() - stage.getPointerPosition().x
+                ));
+            }
+            return {
+                x: this.getX(),
+                y: this.getY()
+            }
+        }
+    });
+    return yellowRectGroup;
+}
 
 function createYellowRect(stage, layer, yellowRectGroup) {
     var yellowRect = new Kinetic.Rect({
@@ -80,9 +81,9 @@ function createYellowRect(stage, layer, yellowRectGroup) {
                 stroke: 'darkGray',
                 strokeWidth: 2
             });
-            var circleLeft = circleOnClick(layer, yellowRectGroup, true);
+            var circleLeft = circleOnClick(layer, yellowRectGroup, 'left');
             yellowRectGroup.add(circleLeft);
-            var circleRight = circleOnClick(layer, yellowRectGroup, false);
+            var circleRight = circleOnClick(layer, yellowRectGroup, 'right');
             yellowRectGroup.add(circleRight);
             layer.draw();
         }
@@ -90,10 +91,12 @@ function createYellowRect(stage, layer, yellowRectGroup) {
     return yellowRect;
 }
 
-function circleOnClick(layer, yellowRectGroup, leftCircle) {
+function circleOnClick(layer, yellowRectGroup, orientation) {
+    var leftCircle = orientation === 'left' ? true : false;
     var yellowRect = yellowRectGroup.find('#yellowRect')[0];
     var offsetX = leftCircle ? 0 : yellowRect.getWidth();
     var circle = new Kinetic.Circle({
+        orientation: orientation,
         name: 'yellowRectCircle',
         x: offsetX,
         y: yellowRect.getY(),
@@ -114,6 +117,9 @@ function circleOnClick(layer, yellowRectGroup, leftCircle) {
         } else {
             setCirclesTransparent(yellowRectGroup);
             yellowRectGroup.setDraggable(false);
+            /*if (this.getAttr('orientation') === 'left') {
+
+            }*/
         }
         layer.draw();
     });
@@ -174,12 +180,12 @@ function createBackLayer(stage, layer) {
     // There's probably a better way to do this, but I don't know it.
     stage.on('click', function (evt) {
         if (evt.targetNode.attrs.name == 'backLayer') {
-            var yellowRectGroup = stage.find('#yellowRectGroup')[0];
-            var yellowRect = yellowRectGroup.find('#yellowRect')[0];
+            var yellowRectGroup = this.find('#yellowRectGroup')[0];
+            var yellowRect = this.find('#yellowRect')[0];
             yellowRectGroup.setDraggable(false);
             yellowRect.setStroke('black');
             yellowRect.setStrokeWidth(4);
-            $(stage.find('.yellowRectCircle')).each(function( index ) {
+            $(this.find('.yellowRectCircle')).each(function( index ) {
                 if (typeof this !== 'undefined') {
                     this.destroy();
                 }
