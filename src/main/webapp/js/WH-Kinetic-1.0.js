@@ -5,6 +5,7 @@
  * Time: 19:51
  * To change this template use File | Settings | File Templates.
  */
+var WHUnitList = new Array();
 $(document).ready(function () {
     var stage = new Kinetic.Stage({
         container: 'container',
@@ -15,149 +16,153 @@ $(document).ready(function () {
         height: $('#canvas-wrapper').height(),
         */
     });
-    var layer = new Kinetic.Layer();
+    var layer = new Kinetic.Layer({
+        id: 'gameLayer'
+    });
     createBackLayer(stage, layer);
     createGameLayer(stage, layer);
     drawGrid(layer);
-    var yellowRectGroup = createYellowRectGroup(stage);
-    var yellowRect = createYellowRect(stage, layer, yellowRectGroup);
-    yellowRectGroup.add(yellowRect);
-    layer.add(yellowRectGroup);
+    WHUnitList[0] = new WHUnit(stage, layer);
     layer.draw();
 });
 
-function createYellowRectGroup(stage) {
-    var yellowRectGroup = new Kinetic.Group({
-        id: 'yellowRectGroup',
-        x: 250,
-        y: 200,
-        offset: [0, 0],
-        draggable: false,
-        rotateLeftHand: true,
-        dragBoundFunc: function (pos) {
-            if (this.getAttr('rotateLeftHand')) {
-                this.setRotation(Math.atan2(
-                    stage.getPointerPosition().y - this.getY(),
-                    stage.getPointerPosition().x - this.getX()
-                ));
-            } else {
-                this.setRotation(Math.atan2(
-                    this.getY() - stage.getPointerPosition().y,
-                    this.getX() - stage.getPointerPosition().x
-                ));
-            }
-            return {
-                x: this.getX(),
-                y: this.getY()
-            }
-        }
-    });
-    return yellowRectGroup;
-}
+function WHUnit(stage, layer) {
+    init(this);
+    this.name = 'WHUnit';
+    this.deactivateUnitGroup = deactivateUnitGroup;
 
-function createYellowRect(stage, layer, yellowRectGroup) {
-    var yellowRect = new Kinetic.Rect({
-        id: 'yellowRect',
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 50,
-        fill: 'yellow',
-        stroke: 'black',
-        strokeWidth: 4
-    });
-    yellowRect.on('click', function () {
-        var circle = stage.find('.yellowRectCircle')[0];
-        if (typeof circle === 'undefined') {
-            this.setStroke(true);
-            this.setStroke('66CC66');
-            this.setStrokeWidth(2);
-            var circleLeft = new Kinetic.Circle({
-                name: 'yellowRectCircle',
-                x: this.getX(),
-                y: this.getY(),
-                radius: 10,
-                fill: 'transparent',
-                stroke: 'darkGray',
-                strokeWidth: 2
-            });
-            var circleLeft = circleOnClick(layer, yellowRectGroup, 'left');
-            yellowRectGroup.add(circleLeft);
-            var circleRight = circleOnClick(layer, yellowRectGroup, 'right');
-            yellowRectGroup.add(circleRight);
+    function init(WHUnit) {
+        WHUnit.unitGroup = new Kinetic.Group({
+            isLeft: null,
+            x: 250,
+            y: 200,
+            offset: [0, 0],
+            draggable: false,
+            dragBoundFunc: function (pos) {
+                if (WHUnit.unitGroup.getAttr('isLeft')) {
+                    WHUnit.unitGroup.setRotation(Math.atan2(
+                        WHUnit.unitGroup.getY() - stage.getPointerPosition().y,
+                        WHUnit.unitGroup.getX() - stage.getPointerPosition().x
+                    ));
+                } else {
+                    WHUnit.unitGroup.setRotation(Math.atan2(
+                        stage.getPointerPosition().y - WHUnit.unitGroup.getY(),
+                        stage.getPointerPosition().x - WHUnit.unitGroup.getX()
+                    ));
+                }
+                return {
+                    x: WHUnit.unitGroup.getX(),
+                    y: WHUnit.unitGroup.getY()
+                }
+            }
+        });
+        createUnitRect(WHUnit);
+        WHUnit.unitGroup.add(WHUnit.unitRect);
+        layer.add(WHUnit.unitGroup);
+    }
+
+    function createUnitRect(WHUnit) {
+        WHUnit.unitRect = new Kinetic.Rect({
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 50,
+            fill: 'yellow',
+            stroke: 'black',
+            strokeWidth: 4
+        });
+        WHUnit.unitRect.on('click', function () {
+            var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
+            if (typeof circle === 'undefined') {
+                WHUnit.unitRect.setStroke('66CC66');
+                WHUnit.unitRect.setStrokeWidth(2);
+                createRotationCircle(WHUnit, true);
+                createRotationCircle(WHUnit, false);
+            }
             layer.draw();
-        }
-    });
-    return yellowRect;
-}
+        });
+    }
 
-function circleOnClick(layer, yellowRectGroup, orientation) {
-    var isLeftCircle = orientation === 'left' ? true : false;
-    var yellowRect = yellowRectGroup.find('#yellowRect')[0];
-    var circle = new Kinetic.Circle({
-        orientation: orientation,
-        name: 'yellowRectCircle',
-        x: isLeftCircle ? 0 : yellowRect.getWidth(),
-        y: 0,
-        radius: 10,
-        fill: 'transparent',
-        stroke: 'darkGray',
-        strokeWidth: 2
-    });
-    circle.on('click', function () {
-        var circles = yellowRectGroup.find('.yellowRectCircle');
-        if (allCirclesInactive(circles)) {
-            var offsetArray = isLeftCircle ? [100, 0] : [0, 0];
-            var moveArray = getRightCircleXY(yellowRectGroup, yellowRect);
-            var groupX = isLeftCircle ? yellowRectGroup.getX() + moveArray[0] : yellowRectGroup.getX();
-            var groupY = isLeftCircle ? yellowRectGroup.getY() + moveArray[1] : yellowRectGroup.getY();
-            this.setFill('darkGray');
-            yellowRectGroup.setAbsolutePosition(groupX, groupY);
-            yellowRectGroup.setOffset(offsetArray);
-            yellowRectGroup.setDraggable(true);
-            yellowRectGroup.setAttr('rotateLeftHand', !isLeftCircle);
-        } else {
-            setCirclesInactive(circles);
-            yellowRectGroup.setDraggable(false);
-            if (this.getAttr('orientation') === 'left') {
-                yellowRectGroup.setOffset([0, 0]);
-                var moveArray = getLeftCircleXY(yellowRectGroup, yellowRect);
-                var groupX = isLeftCircle ? yellowRectGroup.getX() + moveArray[0] : yellowRectGroup.getX();
-                var groupY = isLeftCircle ? yellowRectGroup.getY() + moveArray[1] : yellowRectGroup.getY();
-                yellowRectGroup.setAbsolutePosition(groupX, groupY);
+    function createRotationCircle(WHUnit, isLeft) {
+        var rotationCircle = new Kinetic.Circle({
+            name: 'rotationCircle',
+            x: isLeft ? 0 : WHUnit.unitRect.getWidth(),
+            y: 0,
+            radius: 10,
+            fill: 'transparent',
+            stroke: 'darkGray',
+            strokeWidth: 2
+        });
+        rotationCircle.on('mousedown', function () {
+            var circles = WHUnit.unitGroup.find('.rotationCircle');
+            if (allCirclesTransparent(circles)) {
+                var offsetArray = isLeft ? [100, 0] : [0, 0];
+                var moveArray = getRightCircleXY(WHUnit);
+                var groupX = isLeft ? WHUnit.unitGroup.getX() + moveArray[0] : WHUnit.unitGroup.getX();
+                var groupY = isLeft ? WHUnit.unitGroup.getY() + moveArray[1] : WHUnit.unitGroup.getY();
+                rotationCircle.setFill('darkGray');
+                WHUnit.unitGroup.setAbsolutePosition(groupX, groupY);
+                WHUnit.unitGroup.setOffset(offsetArray);
+                WHUnit.unitGroup.setDraggable(true);
+                WHUnit.unitGroup.setAttr('isLeft', isLeft);
+            } else {
+                setCirclesTransparent(circles);
+                WHUnit.unitGroup.setDraggable(false);
+                restorePositionAndOffset(WHUnit);
+            }
+            layer.draw();
+        });
+        WHUnit.unitGroup.add(rotationCircle);
+    }
+
+    function getLeftCircleXY(WHUnit) {
+        var radian = WHUnit.unitGroup.getRotation();
+        var width = Math.cos(radian) * WHUnit.unitRect.getWidth();
+        var height = Math.sin(radian) * WHUnit.unitRect.getWidth();
+        return [-width, -height];
+    }
+
+    function getRightCircleXY(WHUnit) {
+        var radian = WHUnit.unitGroup.getRotation();
+        var width = Math.cos(radian) * WHUnit.unitRect.getWidth();
+        var height = Math.sin(radian) * WHUnit.unitRect.getWidth();
+        return [width, height];
+    }
+
+    function allCirclesTransparent(circles) {
+        for (var i = 0; i < circles.length; i++) {
+            if (circles[i].getFill() !== 'transparent') {
+                return false;
             }
         }
-        layer.draw();
-    });
-    return circle;
-}
+        return true;
+    }
 
-function getLeftCircleXY(yellowRectGroup, yellowRect) {
-    var radian = yellowRectGroup.getRotation();
-    var width = Math.cos(radian) * yellowRect.getWidth();
-    var height = Math.sin(radian) * yellowRect.getWidth();
-    return [-width, -height];
-}
-
-function getRightCircleXY(yellowRectGroup, yellowRect) {
-    var radian = yellowRectGroup.getRotation();
-    var width = Math.cos(radian) * yellowRect.getWidth();
-    var height = Math.sin(radian) * yellowRect.getWidth();
-    return [width, height];
-}
-
-function allCirclesInactive(circles) {
-    for (var i = 0; i < circles.length; i++) {
-        if (circles[i].getFill() !== 'transparent') {
-            return false;
+    function setCirclesTransparent(circles) {
+        for (var i = 0; i < circles.length; i++) {
+            circles[i].setFill('transparent');
         }
     }
-    return true;
-}
 
-function setCirclesInactive(circles) {
-    for (var i = 0; i < circles.length; i++) {
-        circles[i].setFill('transparent');
+    function deactivateUnitGroup(WHUnit) {
+        WHUnit.unitGroup.setDraggable(false);
+        restorePositionAndOffset(WHUnit);
+        WHUnit.unitRect.setStroke('black');
+        WHUnit.unitRect.setStrokeWidth(4);
+        $(WHUnit.unitGroup.find('.rotationCircle')).each(function (index) {
+            this.destroy();
+        });
+    }
+
+    function restorePositionAndOffset(WHUnit) {
+        if (WHUnit.unitGroup.getAttr('isLeft')) {
+            WHUnit.unitGroup.setOffset([0, 0]);
+            var moveArray = getLeftCircleXY(WHUnit);
+            var groupX = WHUnit.unitGroup.getAttr('isLeft') ? WHUnit.unitGroup.getX() + moveArray[0] : WHUnit.unitGroup.getX();
+            var groupY = WHUnit.unitGroup.getAttr('isLeft') ? WHUnit.unitGroup.getY() + moveArray[1] : WHUnit.unitGroup.getY();
+            WHUnit.unitGroup.setAbsolutePosition(groupX, groupY);
+            WHUnit.unitGroup.setAttr('isLeft', null);
+        }
     }
 }
 
@@ -199,18 +204,11 @@ function createBackLayer(stage, layer) {
     // There's probably a better way to do this, but I don't know it.
     stage.on('click', function (evt) {
         if (evt.targetNode.attrs.name == 'backLayer') {
-            var yellowRectGroup = this.find('#yellowRectGroup')[0];
-            var yellowRect = this.find('#yellowRect')[0];
-            yellowRectGroup.setDraggable(false);
-            yellowRect.setStroke('black');
-            yellowRect.setStrokeWidth(4);
-            $(this.find('.yellowRectCircle')).each(function( index ) {
-                if (typeof this !== 'undefined') {
-                    this.destroy();
-                }
+            $(WHUnitList).each(function (index) {
+                this.deactivateUnitGroup(this);
             });
-            layer.draw();
         }
+        layer.draw();
     });
     stage.add(backLayer);
 }
