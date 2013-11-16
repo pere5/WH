@@ -21,24 +21,24 @@ $(document).ready(function () {
     });
     createBackLayer(stage, layer);
     stage.add(layer);
-    WHUnitList[0] = new WHUnit(stage, layer);
+    WHUnitList[0] = new WHUnit(stage, layer, 250, 200);
+    WHUnitList[1] = new WHUnit(stage, layer, 350, 400);
     layer.draw();
 });
 
-function WHUnit(stage, layer) {
+function WHUnit(stage, layer, x, y) {
     init(this);
     this.name = 'WHUnit';
     this.deactivateUnitGroup = deactivateUnitGroup;
-
+    this.isLeft = null;
     function init(WHUnit) {
         WHUnit.unitGroup = new Kinetic.Group({
-            isLeft: null,
-            x: 250,
-            y: 200,
+            x: x,
+            y: y,
             offset: [0, 0],
             draggable: false,
             dragBoundFunc: function (pos) {
-                if (WHUnit.unitGroup.getAttr('isLeft')) {
+                if (WHUnit.unitGroup.isLeft) {
                     WHUnit.unitGroup.setRotation(Math.atan2(
                         WHUnit.unitGroup.getY() - stage.getPointerPosition().y,
                         WHUnit.unitGroup.getX() - stage.getPointerPosition().x
@@ -103,7 +103,7 @@ function WHUnit(stage, layer) {
                 WHUnit.unitGroup.setAbsolutePosition(groupX, groupY);
                 WHUnit.unitGroup.setOffset(offsetArray);
                 WHUnit.unitGroup.setDraggable(true);
-                WHUnit.unitGroup.setAttr('isLeft', isLeft);
+                WHUnit.unitGroup.isLeft = isLeft;
             } else {
                 setCirclesTransparent(circles);
                 WHUnit.unitGroup.setDraggable(false);
@@ -154,13 +154,13 @@ function WHUnit(stage, layer) {
     }
 
     function restorePositionAndOffset(WHUnit) {
-        if (WHUnit.unitGroup.getAttr('isLeft')) {
+        if (WHUnit.unitGroup.isLeft) {
             WHUnit.unitGroup.setOffset([0, 0]);
             var moveArray = getLeftCircleXY(WHUnit);
-            var groupX = WHUnit.unitGroup.getAttr('isLeft') ? WHUnit.unitGroup.getX() + moveArray[0] : WHUnit.unitGroup.getX();
-            var groupY = WHUnit.unitGroup.getAttr('isLeft') ? WHUnit.unitGroup.getY() + moveArray[1] : WHUnit.unitGroup.getY();
+            var groupX = WHUnit.unitGroup.isLeft ? WHUnit.unitGroup.getX() + moveArray[0] : WHUnit.unitGroup.getX();
+            var groupY = WHUnit.unitGroup.isLeft ? WHUnit.unitGroup.getY() + moveArray[1] : WHUnit.unitGroup.getY();
             WHUnit.unitGroup.setAbsolutePosition(groupX, groupY);
-            WHUnit.unitGroup.setAttr('isLeft', null);
+            WHUnit.unitGroup.isLeft = null;
         }
     }
 }
