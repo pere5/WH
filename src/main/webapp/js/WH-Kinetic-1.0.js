@@ -57,7 +57,6 @@ function WHUnit(stage, layer, x, y) {
             }
         });
         createUnitRect(WHUnit);
-        WHUnit.unitGroup.add(WHUnit.unitRect);
         layer.add(WHUnit.unitGroup);
     }
 
@@ -81,6 +80,7 @@ function WHUnit(stage, layer, x, y) {
             }
             layer.draw();
         });
+        WHUnit.unitGroup.add(WHUnit.unitRect);
     }
 
     function createRotationCircle(WHUnit, isLeft) {
