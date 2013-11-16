@@ -27,10 +27,11 @@ $(document).ready(function () {
 });
 
 function WHUnit(stage, layer, x, y) {
-    init(this);
     this.name = 'WHUnit';
-    this.deactivateUnitGroup = deactivateUnitGroup;
     this.isLeft = null;
+    this.deactivateUnitGroup = deactivateUnitGroup;
+    init(this);
+
     function init(WHUnit) {
         WHUnit.unitGroup = new Kinetic.Group({
             x: x,
