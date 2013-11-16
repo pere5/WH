@@ -20,8 +20,7 @@ $(document).ready(function () {
         id: 'gameLayer'
     });
     createBackLayer(stage, layer);
-    createGameLayer(stage, layer);
-    drawGrid(layer);
+    stage.add(layer);
     WHUnitList[0] = new WHUnit(stage, layer);
     layer.draw();
 });
@@ -194,6 +193,7 @@ function drawGrid(layer) {
 
 function createBackLayer(stage, layer) {
     var backLayer = new Kinetic.Layer();
+    drawGrid(backLayer);
     backLayer.add(new Kinetic.Rect({
         x: 0,
         y: 0,
@@ -211,8 +211,4 @@ function createBackLayer(stage, layer) {
         layer.draw();
     });
     stage.add(backLayer);
-}
-
-function createGameLayer(stage, layer) {
-    stage.add(layer);
 }
