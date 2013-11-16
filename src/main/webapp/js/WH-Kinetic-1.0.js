@@ -69,7 +69,7 @@ function createYellowRect(stage, layer, yellowRectGroup) {
     yellowRect.on('click', function () {
         var circle = stage.find('.yellowRectCircle')[0];
         if (typeof circle === 'undefined') {
-            this.setStroke(true)
+            this.setStroke(true);
             this.setStroke('66CC66');
             this.setStrokeWidth(2);
             var circleLeft = new Kinetic.Circle({
@@ -92,42 +92,61 @@ function createYellowRect(stage, layer, yellowRectGroup) {
 }
 
 function circleOnClick(layer, yellowRectGroup, orientation) {
-    var leftCircle = orientation === 'left' ? true : false;
+    var isLeftCircle = orientation === 'left' ? true : false;
     var yellowRect = yellowRectGroup.find('#yellowRect')[0];
-    var offsetX = leftCircle ? 0 : yellowRect.getWidth();
     var circle = new Kinetic.Circle({
         orientation: orientation,
         name: 'yellowRectCircle',
-        x: offsetX,
-        y: yellowRect.getY(),
+        x: isLeftCircle ? 0 : yellowRect.getWidth(),
+        y: 0,
         radius: 10,
         fill: 'transparent',
         stroke: 'darkGray',
         strokeWidth: 2
     });
-    var groupX = leftCircle ? yellowRectGroup.getX() + yellowRect.getWidth() : yellowRectGroup.getX();
-    var offsetXReverse = leftCircle ? yellowRect.getWidth() : 0;
     circle.on('click', function () {
-        if (isCirclesTransparent(yellowRectGroup)) {
+        var circles = yellowRectGroup.find('.yellowRectCircle');
+        if (allCirclesInactive(circles)) {
+            var offsetArray = isLeftCircle ? [100, 0] : [0, 0];
+            var moveArray = getRightCircleXY(yellowRectGroup, yellowRect);
+            var groupX = isLeftCircle ? yellowRectGroup.getX() + moveArray[0] : yellowRectGroup.getX();
+            var groupY = isLeftCircle ? yellowRectGroup.getY() + moveArray[1] : yellowRectGroup.getY();
             this.setFill('darkGray');
-            yellowRectGroup.setX(groupX);
-            yellowRectGroup.setOffset([offsetXReverse, 0]);
+            yellowRectGroup.setAbsolutePosition(groupX, groupY);
+            yellowRectGroup.setOffset(offsetArray);
             yellowRectGroup.setDraggable(true);
-            yellowRectGroup.setAttr('rotateLeftHand', !leftCircle);
+            yellowRectGroup.setAttr('rotateLeftHand', !isLeftCircle);
         } else {
-            setCirclesTransparent(yellowRectGroup);
+            setCirclesInactive(circles);
             yellowRectGroup.setDraggable(false);
-            /*if (this.getAttr('orientation') === 'left') {
-
-            }*/
+            if (this.getAttr('orientation') === 'left') {
+                yellowRectGroup.setOffset([0, 0]);
+                var moveArray = getLeftCircleXY(yellowRectGroup, yellowRect);
+                var groupX = isLeftCircle ? yellowRectGroup.getX() + moveArray[0] : yellowRectGroup.getX();
+                var groupY = isLeftCircle ? yellowRectGroup.getY() + moveArray[1] : yellowRectGroup.getY();
+                yellowRectGroup.setAbsolutePosition(groupX, groupY);
+            }
         }
         layer.draw();
     });
     return circle;
 }
 
-function isCirclesTransparent(yellowRectGroup) {
-    var circles = yellowRectGroup.find('.yellowRectCircle');
+function getLeftCircleXY(yellowRectGroup, yellowRect) {
+    var radian = yellowRectGroup.getRotation();
+    var width = Math.cos(radian) * yellowRect.getWidth();
+    var height = Math.sin(radian) * yellowRect.getWidth();
+    return [-width, -height];
+}
+
+function getRightCircleXY(yellowRectGroup, yellowRect) {
+    var radian = yellowRectGroup.getRotation();
+    var width = Math.cos(radian) * yellowRect.getWidth();
+    var height = Math.sin(radian) * yellowRect.getWidth();
+    return [width, height];
+}
+
+function allCirclesInactive(circles) {
     for (var i = 0; i < circles.length; i++) {
         if (circles[i].getFill() !== 'transparent') {
             return false;
@@ -136,10 +155,10 @@ function isCirclesTransparent(yellowRectGroup) {
     return true;
 }
 
-function setCirclesTransparent(yellowRectGroup) {
-    $(yellowRectGroup.find('.yellowRectCircle')).each(function( index ) {
-        this.setFill('transparent');
-    });
+function setCirclesInactive(circles) {
+    for (var i = 0; i < circles.length; i++) {
+        circles[i].setFill('transparent');
+    }
 }
 
 function drawGrid(layer) {
