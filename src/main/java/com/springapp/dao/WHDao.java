@@ -37,8 +37,7 @@ public class WHDao {
         System.out.println("2. find - savedUser : " + savedUser);
 
         // update password
-        mongoTemplate.updateFirst(searchUserQuery,
-                Update.update("password", "new password"),UserForm.class);
+        mongoTemplate.updateFirst(searchUserQuery, Update.update("password", "new password"),UserForm.class);
 
         // find the updated userForm object
         UserForm updatedUser = mongoTemplate.findOne(searchUserQuery, UserForm.class);
