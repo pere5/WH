@@ -13,7 +13,7 @@
     <p>${jstlTest}</p>
     <p>KO First name: <strong data-bind="text: firstName"></strong></p>
     <p>KO Last name: <strong data-bind="text: lastName"></strong></p>
-    <sf:form method="POST" commandName="registerForm">
+    <sf:form method="POST" commandName="userForm">
         Email: <sf:input path="email" /><br/>
         Username: <sf:input path="username" /><br/>
         Password: <sf:password path="password" /><br/>

@@ -6,7 +6,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
+import org.hibernate.validator.constraints.Email;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * Created with IntelliJ IDEA.
  * User: perer
@@ -14,11 +16,29 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * Time: 22:24
  * To change this template use File | Settings | File Templates.
  */
-public class RegisterForm {
-    private Long id;
+
+
+@Document(collection = "users")
+public class UserForm {
+
+    @Id
+    private String id;
+    @NotNull
+    @Size(min=5, max=16, message="{username.size}")
     private String username;
+    @NotNull
+    @Size(min=5, max=25, message="{password.size}")
     private String password;
+    @NotNull
+    @Email(message="{email.valid}")
     private String email;
+
+    public UserForm() {}
+
+    public UserForm(String email, String userName) {
+        this.email = email;
+        this.username = userName;
+    }
 
     public String getUsername() {
         return username;

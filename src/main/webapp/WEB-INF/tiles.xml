@@ -6,6 +6,8 @@
     <definition name="base" template="/WEB-INF/pages/base.jsp">
         <put-attribute name="right" value="/WEB-INF/pages/right.jsp" />
     </definition>
+
+    
     <definition name="gameScreen" extends="base">
         <put-attribute name="body" value="/WEB-INF/pages/gameScreen.jsp" />
     </definition>
