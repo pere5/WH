@@ -28,7 +28,6 @@ $(document).ready(function () {
 });
 
 function WHUnit(stage, layer, x, y, rot) {
-    this.name = 'WHUnit';
     this.isLeft = null;
     this.deactivateUnitGroup = deactivateUnitGroup;
     init(this);
