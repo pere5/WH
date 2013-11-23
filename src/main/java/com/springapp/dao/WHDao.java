@@ -52,4 +52,8 @@ public class WHDao {
         System.out.println("4. Number of userForm = " + listUser.size());
 
     }
+
+    public void doNothing(UserForm userForm) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
 }

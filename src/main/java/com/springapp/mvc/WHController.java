@@ -28,7 +28,7 @@ public class WHController {
     @RequestMapping(method=POST)
     public String showRegistrationForm(UserForm userForm, Model model) {
         wiredWHUtil.prepareModel(model, "Spring MVC: " + userForm.getUsername());
-        wiredWHDao.doThings(userForm);
+        wiredWHDao.doNothing(userForm);
         return "gameScreen";
     }
 }
