@@ -22,7 +22,7 @@
 
     <!--Annotations-->
     <context:annotation-config />
-    <context:component-scan base-package="com.springapp.mvc"/>
+    <context:component-scan base-package="com.springapp"/>
 
 
     <!--Apache Tiles-->
@@ -30,9 +30,4 @@
         <property name="definitions" value="/WEB-INF/tiles.xml" />
     </bean>
     <bean id="viewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver" />
-
-
-    <!--Local Beans-->
-    <bean id="wiredWHUtil" class="com.springapp.mvc.util.WHControllerUtil" />
-    <bean id="wiredWHDao" class="com.springapp.dao.WHDao" />
 </beans>
