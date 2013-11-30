@@ -1,7 +1,7 @@
 package com.springapp.mvc.util;
 
 import com.springapp.model.UserForm;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 /**
@@ -11,7 +11,7 @@ import org.springframework.ui.Model;
  * Time: 12:55
  * To change this template use File | Settings | File Templates.
  */
-@Service
+@Component
 public class WHControllerUtil {
     public void prepareModel(Model model, String message) {
         model.addAttribute("message", message);
