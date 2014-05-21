@@ -21,15 +21,20 @@ $(document).ready(function () {
     });
     createBackLayer(stage, layer);
     stage.add(layer);
-    globalWHUnitList.push(new WHUnit(stage, layer, 250, 200, 0));
-    globalWHUnitList.push(new WHUnit(stage, layer, 450, 250, Math.PI / 6));
-    globalWHUnitList.push(new WHUnit(stage, layer, 350, 400, Math.PI / 2));
+    globalWHUnitList.push(new WHUnit(stage, layer, 250, 200, 0, 'red'));
+    globalWHUnitList.push(new WHUnit(stage, layer, 450, 250, Math.PI / 6, 'green'));
+    globalWHUnitList.push(new WHUnit(stage, layer, 350, 400, Math.PI / 2, 'blue'));
     layer.draw();
 });
 
-function WHUnit(stage, layer, x, y, rot) {
+function WHUnit(stage, layer, x, y, rot, fillColor) {
     this.isLeft = null;
     this.deactivateUnitGroup = deactivateUnitGroup;
+    this.strokeColor = 'black';
+    this.fillColor = fillColor;
+    this.numberOfModels = 20;
+    this.unitWidth = 5; // models in first rank
+    this.models = new Array(this.numberOfModels);
     init(this);
 
     function init(WHUnit) {
@@ -99,11 +104,32 @@ function WHUnit(stage, layer, x, y, rot) {
             y: 0,
             width: 100,
             height: 50,
-            fill: 'red',
-            stroke: 'green',
+            fill: 'transparent',
+            stroke: WHUnit.strokeColor,
             strokeWidth: 4
         });
         WHUnit.unitRect.on('click', function () {
+            WHUnit.eventFunctions.click(WHUnit);
+        });
+        
+        WHUnit.unitGroup.add(WHUnit.unitRect);
+        
+        // Compute model sizes
+        var width = WHUnit.unitRect.getWidth()/WHUnit.unitWidth;
+        var ranks = WHUnit.numberOfModels/WHUnit.unitWidth;
+        var height = WHUnit.unitRect.getHeight()/ranks;
+        
+        // Create models
+        for (var i = 0; i < WHUnit.models.length; i++) {
+            var rank = Math.floor(i / WHUnit.unitWidth);
+            var column = i % WHUnit.unitWidth;
+            var x = WHUnit.unitRect.getX() + column*width;
+            var y = WHUnit.unitRect.getY() + rank*height;
+            WHUnit.models[i] = new WHModel(WHUnit, x, y, width, height);
+        }
+    }
+    this.eventFunctions = {
+        click: function(WHUnit) {
             var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
             if (circle == null) {
                 WHUnit.unitGroup.setDraggable(true);
@@ -113,8 +139,7 @@ function WHUnit(stage, layer, x, y, rot) {
                 createRotationCircle(WHUnit, false);
             }
             layer.draw();
-        });
-        WHUnit.unitGroup.add(WHUnit.unitRect);
+        }
     }
 
     function createRotationCircle(WHUnit, isLeft) {
@@ -181,7 +206,7 @@ function WHUnit(stage, layer, x, y, rot) {
         restorePositionAndOffset(WHUnit);
         WHUnit.unitGroup.setDraggable(false);
         WHUnit.unitGroup.isLeft = null;
-        WHUnit.unitRect.setStroke('black');
+        WHUnit.unitRect.setStroke(WHUnit.strokeColor);
         WHUnit.unitRect.setStrokeWidth(4);
         $(WHUnit.unitGroup.find('.rotationCircle')).each(function (index) {
             this.destroy();
@@ -200,6 +225,32 @@ function WHUnit(stage, layer, x, y, rot) {
 
     function plainWrong(WHUnit) {
         alert('This shouldn\'t happen... =/');
+    }
+}
+
+function WHModel(WHUnit, x, y, width, height){
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    init(this, WHUnit);
+    
+    function init(WHModel, WHUnit) {
+        createUnitRect(WHModel, WHUnit);
+    }
+    
+    function createUnitRect(WHModel, WHUnit) {
+        WHModel.unitRect = new Kinetic.Rect({
+            x: WHModel.x,
+            y: WHModel.y,
+            width: WHModel.width,
+            height: WHModel.height,
+            fill: 'yellow',
+            stroke: WHUnit.strokeColor,
+            strokeWidth: 4
+        });
+        WHModel.unitRect.on('click', function () { WHUnit.eventFunctions.click(WHUnit); });
+        WHUnit.unitGroup.add(WHModel.unitRect);
     }
 }
 
