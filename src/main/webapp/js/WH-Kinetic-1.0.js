@@ -99,7 +99,7 @@ function WHUnit(stage, layer, x, y, rot) {
             y: 0,
             width: 100,
             height: 50,
-            fill: 'yellow',
+            fill: 'red',
             stroke: 'green',
             strokeWidth: 4
         });
