@@ -15,6 +15,6 @@ import org.springframework.ui.Model;
 public class WHControllerUtil {
     public void prepareModel(Model model, String message) {
         model.addAttribute("message", message);
-        model.addAttribute(new UserForm("daagnall@hotmail.com", "DaaGnall"));
+        model.addAttribute(new UserForm("daagnall@hotmail.com", "ÿermuch"));
     }
 }
