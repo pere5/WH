@@ -100,7 +100,7 @@ function WHUnit(stage, layer, x, y, rot) {
             width: 100,
             height: 50,
             fill: 'yellow',
-            stroke: 'black',
+            stroke: 'green',
             strokeWidth: 4
         });
         WHUnit.unitRect.on('click', function () {
@@ -238,7 +238,8 @@ function createBackLayer(stage, layer) {
         width: stage.getWidth(),
         height: stage.getHeight(),
         name: 'backLayer'
-    })); // this rect will allow us to use mouse events on the layer.
+    })); 
+    // this rect will allow us to use mouse events on the layer.
     // There's probably a better way to do this, but I don't know it.
     stage.on('click', function (evt) {
         if (evt.targetNode.attrs.name == 'backLayer') {
