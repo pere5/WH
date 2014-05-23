@@ -28,8 +28,8 @@ $(document).ready(function () {
 });
 
 function WHUnit(stage, layer, x, y, rot, fillColor) {
-    this.isLeft = null;
     this.deactivateUnitGroup = deactivateUnitGroup;
+    this.eventFunctions = eventFunctions;
     this.strokeColor = 'black';
     this.fillColor = fillColor;
     this.numberOfModels = 20;
@@ -108,7 +108,9 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
             stroke: WHUnit.strokeColor,
             strokeWidth: 4
         });
-        eventFunctions(WHUnit);
+        WHUnit.unitRect.on('click', function() {
+            eventFunctions(WHUnit);
+        });
         
         WHUnit.unitGroup.add(WHUnit.unitRect);
         
@@ -128,17 +130,15 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
     }
 
     function eventFunctions(WHUnit) {
-        WHUnit.unitRect.on('click', function () {
-            var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
-            if (circle == null) {
-                WHUnit.unitGroup.setDraggable(true);
-                WHUnit.unitRect.setStroke('66CC66');
-                WHUnit.unitRect.setStrokeWidth(2);
-                createRotationCircle(WHUnit, true);
-                createRotationCircle(WHUnit, false);
-            }
-            layer.draw();
-        });
+        var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
+        if (circle == null) {
+            WHUnit.unitGroup.setDraggable(true);
+            WHUnit.unitRect.setStroke('66CC66');
+            WHUnit.unitRect.setStrokeWidth(2);
+            createRotationCircle(WHUnit, true);
+            createRotationCircle(WHUnit, false);
+        }
+        layer.draw();
     }
 
     function createRotationCircle(WHUnit, isLeft) {
@@ -248,7 +248,9 @@ function WHModel(WHUnit, x, y, width, height){
             stroke: WHUnit.strokeColor,
             strokeWidth: 4
         });
-        WHModel.unitRect.on('click', function () { WHUnit.eventFunctions.click(WHUnit); });
+        WHModel.unitRect.on('click', function () {
+            WHUnit.eventFunctions(WHUnit);
+        });
         WHUnit.unitGroup.add(WHModel.unitRect);
     }
 }
