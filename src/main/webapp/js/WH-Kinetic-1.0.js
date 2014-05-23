@@ -5,7 +5,7 @@
  * Time: 19:51
  * To change this template use File | Settings | File Templates.
  */
-var globalWHUnitList = new Array();
+var globalWHUnitList = [];
 $(document).ready(function () {
     var stage = new Kinetic.Stage({
         container: 'container',
@@ -34,7 +34,7 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
     this.fillColor = fillColor;
     this.numberOfModels = 20;
     this.unitWidth = 5; // models in first rank
-    this.models = new Array(this.numberOfModels);
+    this.models = [];
     init(this);
 
     function init(WHUnit) {
@@ -116,14 +116,14 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
         var width = WHUnit.unitRect.getWidth()/WHUnit.unitWidth;
         var ranks = WHUnit.numberOfModels/WHUnit.unitWidth;
         var height = WHUnit.unitRect.getHeight()/ranks;
-        
+
         // Create models
-        for (var i = 0; i < WHUnit.models.length; i++) {
+        for (var i = 0; i < WHUnit.numberOfModels; i++) {
             var rank = Math.floor(i / WHUnit.unitWidth);
             var column = i % WHUnit.unitWidth;
             var x = WHUnit.unitRect.getX() + column*width;
             var y = WHUnit.unitRect.getY() + rank*height;
-            WHUnit.models[i] = new WHModel(WHUnit, x, y, width, height);
+            WHUnit.models.push(new WHModel(WHUnit, x, y, width, height));
         }
     }
 
