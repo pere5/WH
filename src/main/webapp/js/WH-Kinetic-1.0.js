@@ -108,9 +108,7 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
             stroke: WHUnit.strokeColor,
             strokeWidth: 4
         });
-        WHUnit.unitRect.on('click', function () {
-            WHUnit.eventFunctions.click(WHUnit);
-        });
+        eventFunctions(WHUnit);
         
         WHUnit.unitGroup.add(WHUnit.unitRect);
         
@@ -128,8 +126,9 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
             WHUnit.models[i] = new WHModel(WHUnit, x, y, width, height);
         }
     }
-    this.eventFunctions = {
-        click: function(WHUnit) {
+
+    function eventFunctions(WHUnit) {
+        WHUnit.unitRect.on('click', function () {
             var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
             if (circle == null) {
                 WHUnit.unitGroup.setDraggable(true);
@@ -139,7 +138,7 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
                 createRotationCircle(WHUnit, false);
             }
             layer.draw();
-        }
+        });
     }
 
     function createRotationCircle(WHUnit, isLeft) {
