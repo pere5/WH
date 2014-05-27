@@ -30,9 +30,11 @@ $(document).ready(function () {
 function WHUnit(stage, layer, x, y, rot, fillColor) {
     this.deactivateUnitGroup = deactivateUnitGroup;
     this.eventFunctions = eventFunctions;
-    this.strokeColor = 'black';
-    this.fillColor = fillColor;
-    this.numberOfModels = 20;
+    this.unitFillColor = 'transparent';
+    this.unitStrokeColor = 'transparent';
+    this.modelFillColor = fillColor;
+    this.modelStrokeColor = 'black';
+    this.numberOfModels = 17;
     this.unitWidth = 5; // models in first rank
     this.models = [];
     init(this);
@@ -104,8 +106,8 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
             y: 0,
             width: 100,
             height: 50,
-            fill: 'transparent',
-            stroke: WHUnit.strokeColor,
+            fill: WHUnit.unitFillColor,
+            stroke: WHUnit.unitStrokeColor,
             strokeWidth: 4
         });
         WHUnit.unitRect.on('click', function() {
@@ -117,7 +119,7 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
         // Compute model sizes
         var width = WHUnit.unitRect.getWidth()/WHUnit.unitWidth;
         var ranks = WHUnit.numberOfModels/WHUnit.unitWidth;
-        var height = WHUnit.unitRect.getHeight()/ranks;
+        var height = WHUnit.unitRect.getHeight()/(Math.ceil(ranks));
 
         // Create models
         for (var i = 0; i < WHUnit.numberOfModels; i++) {
@@ -127,14 +129,49 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
             var y = WHUnit.unitRect.getY() + rank*height;
             WHUnit.models.push(new WHModel(WHUnit, x, y, width, height));
         }
+        
+        // Regroup models when finished
+        RegroupModels(WHUnit);
+    }
+    
+    // Call after modifying number of models in the unit
+    function RegroupModels(WHUnit) {
+        var unitSize = WHUnit.models.length;
+        var ranks = unitSize/WHUnit.unitWidth;
+        var modelWidth = WHUnit.models[0].width;
+        var modelHeight = WHUnit.models[0].height;
+        
+        var lastRank = Math.floor(ranks);
+        var modelsInLastRank = unitSize - Math.floor(ranks)*WHUnit.unitWidth;
+
+        // Regroup unit
+        for (var i = 0; i < unitSize; i++) {
+            var rank = Math.floor(i / WHUnit.unitWidth);
+              
+            var columnOffset = 0;
+            // In case we want to center last row
+            if(lastRank == rank && modelsInLastRank > 0){
+                var rowWidth = modelWidth*WHUnit.unitWidth;
+                var presentModelsWidth = modelsInLastRank*modelWidth;
+                var padding = rowWidth - presentModelsWidth;
+                // offset by empty space on one side
+                columnOffset = padding/2; 
+            }
+            
+            var column = i % WHUnit.unitWidth;
+            var x = WHUnit.unitRect.getX() + column*modelWidth + columnOffset;
+            var y = WHUnit.unitRect.getY() + rank*modelHeight;
+
+            // Replace old model for now, TODO make a move function or similar for WHModels
+            WHUnit.models[i].unitRect.destroy();
+            WHUnit.models[i] = new WHModel(WHUnit, x, y, modelWidth, modelHeight);
+        }
     }
 
     function eventFunctions(WHUnit) {
         var circle = WHUnit.unitGroup.find('.rotationCircle')[0];
         if (circle == null) {
             WHUnit.unitGroup.setDraggable(true);
-            WHUnit.unitRect.setStroke('66CC66');
-            WHUnit.unitRect.setStrokeWidth(2);
             createRotationCircle(WHUnit, true);
             createRotationCircle(WHUnit, false);
         }
@@ -205,7 +242,7 @@ function WHUnit(stage, layer, x, y, rot, fillColor) {
         restorePositionAndOffset(WHUnit);
         WHUnit.unitGroup.setDraggable(false);
         WHUnit.unitGroup.isLeft = null;
-        WHUnit.unitRect.setStroke(WHUnit.strokeColor);
+        WHUnit.unitRect.setStroke(WHUnit.unitStrokeColor);
         WHUnit.unitRect.setStrokeWidth(4);
         $(WHUnit.unitGroup.find('.rotationCircle')).each(function (index) {
             this.destroy();
@@ -244,8 +281,8 @@ function WHModel(WHUnit, x, y, width, height){
             y: WHModel.y,
             width: WHModel.width,
             height: WHModel.height,
-            fill: 'yellow',
-            stroke: WHUnit.strokeColor,
+            fill: WHUnit.modelFillColor,
+            stroke: WHUnit.modelStrokeColor,
             strokeWidth: 4
         });
         WHModel.unitRect.on('click', function () {
